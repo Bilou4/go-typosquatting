@@ -2,10 +2,10 @@ package main
 
 import (
 	"log"
+	"net"
 	"os"
-	"strings"
 
-	"github.com/domainr/whois"
+	"github.com/asaskevich/govalidator"
 	"github.com/jedib0t/go-pretty/v6/table"
 	"github.com/jedib0t/go-pretty/v6/text"
 	"github.com/pkg/errors"
@@ -14,18 +14,18 @@ import (
 func main() {
 	t := table.NewWriter()
 	t.SetOutputMirror(os.Stdout)
-	domains := []string{"perduuu.com", "google.com", "perdu.com", "facebook.com", "jdkgjigikjb.net"}
+	domains := []string{"perduuu.com", "maps.google.com", "perdu.com", "facebook.com", "jdkgjigikjb.net"}
 
 	t.AppendHeader(table.Row{"#", "Domain name", "Available"})
 	for idx, domain := range domains {
 		exists, err := domainExists(domain)
 		if err != nil {
-			log.Fatalf(err.Error())
+			log.Println(err.Error())
 		}
 		if exists {
-			t.AppendRows([]table.Row{{text.FgHiBlue.Sprintf("%v", idx), text.FgHiBlue.Sprintf("%v", domain), text.FgHiBlue.Sprintf("%v", exists)}})
+			t.AppendRows([]table.Row{{text.FgHiBlue.Sprintf("%v", idx), text.FgHiBlue.Sprintf("%v", domain), text.FgHiBlue.Sprintf("%v", !exists)}})
 		} else {
-			t.AppendRows([]table.Row{{text.FgHiGreen.Sprintf("%v", idx), text.FgHiGreen.Sprintf("%v", domain), text.FgHiGreen.Sprintf("%v", exists)}})
+			t.AppendRows([]table.Row{{text.FgHiGreen.Sprintf("%v", idx), text.FgHiGreen.Sprintf("%v", domain), text.FgHiGreen.Sprintf("%v", !exists)}})
 		}
 	}
 
@@ -35,19 +35,17 @@ func main() {
 }
 
 func domainExists(domain string) (bool, error) {
-	request, err := whois.NewRequest(domain)
-	if err != nil {
-		return false, errors.Wrap(err, "NewRequest failed")
-	}
-	response, err := whois.DefaultClient.Fetch(request)
+	if govalidator.IsDNSName(domain) {
+		addrs, err := net.LookupHost(domain)
+		if err != nil {
+			return false, errors.Wrap(err, "LookupHost failed")
+		}
 
-	if err != nil {
-		return false, errors.Wrap(err, "Fetch failed")
+		if len(addrs) == 0 {
+			return false, errors.Errorf("Empty result")
+		}
+		return true, nil
+	} else {
+		return false, errors.Errorf("Not a valid domain name")
 	}
-
-	if strings.Contains(response.String(), "No match") {
-		return false, nil
-	}
-
-	return true, nil
 }
