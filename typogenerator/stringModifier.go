@@ -31,3 +31,14 @@ func InsertLetter(domain string) []string {
 	}
 	return res
 }
+
+// Double Letter (example » eexample, exxample)
+func DoubleLetter(domain string) []string {
+	var res []string
+	splitDomain := strings.Split(domain, ".")
+	for i := 0; i < len(splitDomain[0]); i++ {
+		tmp := splitDomain[0][:i] + string(splitDomain[0][i]) + splitDomain[0][i:]
+		res = append(res, tmp)
+	}
+	return res
+}
