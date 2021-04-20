@@ -18,3 +18,16 @@ func SkipLetter(domain string) []string {
 	}
 	return res
 }
+
+// Insert Letter (example » erxample, edxample)
+func InsertLetter(domain string) []string {
+	var res []string
+	splitDomain := strings.Split(domain, ".")
+	for i := 0; i < len(splitDomain[0]); i++ {
+		for j := 97; j < 123; j++ {
+			tmp := splitDomain[0][:i] + string(rune(j)) + splitDomain[0][i:]
+			res = append(res, tmp)
+		}
+	}
+	return res
+}
