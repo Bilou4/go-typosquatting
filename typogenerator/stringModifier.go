@@ -46,3 +46,11 @@ func DoubleLetter(domain string) []string {
 	}
 	return res
 }
+
+// Strip Dashes These typos are created by omitting a dash from the domainname. For example, www.domain-name.com becomes www.domainname.com
+func StripDashes(domain string) string {
+	if strings.ContainsRune(domain, '-') {
+		return strings.ReplaceAll(domain, "-", "")
+	}
+	return ""
+}
