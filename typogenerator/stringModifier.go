@@ -65,3 +65,40 @@ func WrongLetter(domain string) []string {
 	}
 	return res
 }
+
+// SwapLetter - exchange two letters (example » xeample, eaxmple)
+func SwapLetter(domain string) []string {
+	var res []string
+	for i := 0; i < len(domain)-1; i++ {
+		tmp := []rune(domain)
+		tmp[i], tmp[i+1] = tmp[i+1], tmp[i]
+		res = append(res, string(tmp))
+	}
+	return res
+}
+
+// Vowel Swapping Swap vowels within the domain name except for the first letter. For example, www.google.com becomes www.gaagle.com.
+func SwapVowel(domain string) []string {
+	var res []string
+	vowels := []string{"a", "e", "i", "o", "u", "y"}
+	for i := 0; i < len(domain); i++ {
+		for _, v := range vowels {
+			if stringInSlice(string(domain[i]), vowels) {
+				if string(domain[i]) != v {
+					tmp := string(domain[:i]) + v + string(domain[i+1:])
+					res = append(res, tmp)
+				}
+			}
+		}
+	}
+	return res
+}
+
+func stringInSlice(a string, list []string) bool {
+	for _, b := range list {
+		if b == a {
+			return true
+		}
+	}
+	return false
+}
