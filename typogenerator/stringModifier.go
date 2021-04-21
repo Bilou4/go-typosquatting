@@ -102,3 +102,13 @@ func stringInSlice(a string, list []string) bool {
 	}
 	return false
 }
+
+// Missing Dot These typos are created by omitting a dot from the domainname. For example, wwwgoogle.com and www.googlecom
+func MissingDot(domain string) []string {
+	var res []string
+	nbDot := strings.Count(domain, ".")
+	for i := 0; i < nbDot; i++ {
+		res = append(res, strings.Replace(domain, ".", "", 1))
+	}
+	return res
+}
