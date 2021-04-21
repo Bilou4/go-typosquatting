@@ -9,12 +9,18 @@ func removeIndex(s string, i int) string {
 	return a
 }
 
+func SplitDomain(domain string) (string, string) {
+	lastIdx := strings.LastIndex(domain, ".")
+	domainTmp := domain[:lastIdx]
+	topLevelDomain := domain[lastIdx+1:]
+	return domainTmp, topLevelDomain
+}
+
 // skipLetter - removes letter from the original domain (example » xample, eample)
 func SkipLetter(domain string) []string {
 	var res []string
-	splitDomain := strings.Split(domain, ".")
-	for i := 0; i < len(splitDomain[0]); i++ {
-		res = append(res, removeIndex(splitDomain[0], i))
+	for i := 0; i < len(domain); i++ {
+		res = append(res, removeIndex(domain, i))
 	}
 	return res
 }
@@ -22,10 +28,9 @@ func SkipLetter(domain string) []string {
 // Insert Letter (example » erxample, edxample)
 func InsertLetter(domain string) []string {
 	var res []string
-	splitDomain := strings.Split(domain, ".")
-	for i := 0; i < len(splitDomain[0]); i++ {
+	for i := 0; i < len(domain); i++ {
 		for j := 97; j < 123; j++ {
-			tmp := splitDomain[0][:i] + string(rune(j)) + splitDomain[0][i:]
+			tmp := domain[:i] + string(rune(j)) + domain[i:]
 			res = append(res, tmp)
 		}
 	}
@@ -35,9 +40,8 @@ func InsertLetter(domain string) []string {
 // Double Letter (example » eexample, exxample)
 func DoubleLetter(domain string) []string {
 	var res []string
-	splitDomain := strings.Split(domain, ".")
-	for i := 0; i < len(splitDomain[0]); i++ {
-		tmp := splitDomain[0][:i] + string(splitDomain[0][i]) + splitDomain[0][i:]
+	for i := 0; i < len(domain); i++ {
+		tmp := domain[:i] + string(domain[i]) + domain[i:]
 		res = append(res, tmp)
 	}
 	return res
