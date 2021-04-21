@@ -112,3 +112,17 @@ func MissingDot(domain string) []string {
 	}
 	return res
 }
+
+// Homoglyphs One or more characters that look similar to another character but are different are called homogylphs. An example is that the lower case l looks similar to the numeral one, e.g. l vs 1. For example, google.com becomes goog1e.com.
+func ReplaceByHomoglyphs(domain string) []string {
+	var res []string
+	domainTmp := domain
+	for _, c := range domainTmp {
+		if homoglyphs, ok := homoglyphMap[c]; ok {
+			for _, homoglyph := range homoglyphs {
+				res = append(res, strings.Replace(domain, string(c), string(homoglyph), 1))
+			}
+		}
+	}
+	return res
+}
