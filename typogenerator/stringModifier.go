@@ -54,3 +54,14 @@ func StripDashes(domain string) string {
 	}
 	return ""
 }
+
+// Wrong Letter - replaces a letter by another one (example » rxample, dxample)
+func WrongLetter(domain string) []string {
+	var res []string
+	for i := 0; i < len(domain); i++ {
+		for j := 97; j < 123; j++ {
+			res = append(res, strings.Replace(domain, string(domain[i]), string(rune(j)), 1))
+		}
+	}
+	return res
+}
