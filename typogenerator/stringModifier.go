@@ -126,3 +126,13 @@ func ReplaceByHomoglyphs(domain string) []string {
 	}
 	return res
 }
+
+// change top domain -- data.iana.org/TLD/tlds-alpha-by-domain.txt
+// For example, www.trademe.co.nz becomes www.trademe.co.nz and www.google.com becomes www.google.org
+func ChangeTopDomain(domain string) []string {
+	var res []string
+	for _, tdl := range topDomain {
+		res = append(res, domain+"."+tdl)
+	}
+	return res
+}
