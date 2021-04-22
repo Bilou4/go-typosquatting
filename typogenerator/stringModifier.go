@@ -84,7 +84,7 @@ func SwapVowel(domain, tld string) []string {
 	vowels := []string{"a", "e", "i", "o", "u", "y"}
 	for i := 0; i < len(domain); i++ {
 		for _, v := range vowels {
-			if stringInSlice(string(domain[i]), vowels) {
+			if StringInSlice(string(domain[i]), vowels) {
 				if string(domain[i]) != v {
 					tmp := string(domain[:i]) + v + string(domain[i+1:])
 					res = append(res, concatDomainTopLevel(tmp, tld))
@@ -95,7 +95,7 @@ func SwapVowel(domain, tld string) []string {
 	return res
 }
 
-func stringInSlice(a string, list []string) bool {
+func StringInSlice(a string, list []string) bool {
 	for _, b := range list {
 		if b == a {
 			return true
