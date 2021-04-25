@@ -24,9 +24,12 @@ go build
 ## Related projects
 
 Special thanks to the authors of these github repositories.
-
 * https://github.com/jedib0t/go-pretty
 * https://github.com/asaskevich/govalidator
+* https://github.com/codebox/homoglyph/
+
+For the Top Level Domain list.
+* http://data.iana.org/TLD/tlds-alpha-by-domain.txt
 
 For the video example.
 * https://github.com/marionebl/svg-term-cli
