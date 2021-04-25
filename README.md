@@ -25,8 +25,8 @@ go build
 
 Special thanks to the authors of these github repositories.
 
-* github.com/jedib0t/go-pretty
-* github.com/asaskevich/govalidator
+* https://github.com/jedib0t/go-pretty
+* https://github.com/asaskevich/govalidator
 
 For the video example.
 * https://github.com/marionebl/svg-term-cli
