@@ -7,6 +7,7 @@ import (
 	"net"
 	"os"
 	"strings"
+	"sync"
 
 	"github.com/asaskevich/govalidator"
 	"github.com/bilou4/go-typosquatting/typogenerator"
@@ -16,6 +17,7 @@ import (
 )
 
 var (
+	cs             ConcurrentSlice
 	domain         string
 	verbose        bool
 	strategies     string
@@ -29,6 +31,7 @@ var (
 		os.Exit(1)
 	}
 	ALL_STRATEGIES = []string{STRATEGY_SKIP, STRATEGY_INSERT, STRATEGY_DOUBLE, STRATEGY_STRIP_DASHES, STRATEGY_WRONG, STRATEGY_SWAP, STRATEGY_SWAP_VOWEL, STRATEGY_DOT, STRATEGY_HOMOGLYPHS, STRATEGY_TOP_DOMAIN}
+	wg             sync.WaitGroup
 )
 
 const (
@@ -43,6 +46,19 @@ const (
 	STRATEGY_HOMOGLYPHS   = "homoglyphs"
 	STRATEGY_TOP_DOMAIN   = "tld"
 )
+
+// ConcurrentSlice allows to access the domains string slice with multiples goroutines
+type ConcurrentSlice struct {
+	sync.RWMutex
+	domains []string
+}
+
+// Appends an item to the concurrent slice
+func (cs *ConcurrentSlice) Append(items []string) {
+	cs.Lock()
+	defer cs.Unlock()
+	cs.domains = append(cs.domains, items...)
+}
 
 func init() {
 	flag.StringVar(&domain, "domain", "", "The domain name you want to usurp")
@@ -75,34 +91,70 @@ func main() {
 	t.SetOutputMirror(os.Stdout)
 	domainTmp, topLevelDomain := typogenerator.SplitDomain(domain)
 
+	// we need to wait X goroutines (X is the number of strategies defined by the user)
+	wg.Add(len(strategiesList))
+
 	for _, strategy := range strategiesList {
 		switch strategy {
 		case STRATEGY_DOUBLE:
-			domains = append(domains, typogenerator.DoubleLetter(domainTmp, topLevelDomain)...)
+			go func(wg *sync.WaitGroup, cs *ConcurrentSlice) {
+				defer wg.Done()
+				cs.Append(typogenerator.DoubleLetter(domainTmp, topLevelDomain))
+			}(&wg, &cs)
 		case STRATEGY_SKIP:
-			domains = append(domains, typogenerator.SkipLetter(domainTmp, topLevelDomain)...)
+			go func(wg *sync.WaitGroup, cs *ConcurrentSlice) {
+				defer wg.Done()
+				cs.Append(typogenerator.SkipLetter(domainTmp, topLevelDomain))
+			}(&wg, &cs)
 		case STRATEGY_INSERT:
-			domains = append(domains, typogenerator.InsertLetter(domainTmp, topLevelDomain)...)
+			go func(wg *sync.WaitGroup, cs *ConcurrentSlice) {
+				defer wg.Done()
+				cs.Append(typogenerator.InsertLetter(domainTmp, topLevelDomain))
+			}(&wg, &cs)
 		case STRATEGY_STRIP_DASHES:
-			domains = append(domains, typogenerator.StripDashes(domainTmp, topLevelDomain))
+			go func(wg *sync.WaitGroup, cs *ConcurrentSlice) {
+				defer wg.Done()
+				c := typogenerator.StripDashes(domainTmp, topLevelDomain)
+				var s []string = []string{c}
+				cs.Append(s)
+			}(&wg, &cs)
 		case STRATEGY_WRONG:
-			domains = append(domains, typogenerator.WrongLetter(domainTmp, topLevelDomain)...)
+			go func(wg *sync.WaitGroup, cs *ConcurrentSlice) {
+				defer wg.Done()
+				cs.Append(typogenerator.WrongLetter(domainTmp, topLevelDomain))
+			}(&wg, &cs)
 		case STRATEGY_SWAP:
-			domains = append(domains, typogenerator.SwapLetter(domainTmp, topLevelDomain)...)
+			go func(wg *sync.WaitGroup, cs *ConcurrentSlice) {
+				defer wg.Done()
+				cs.Append(typogenerator.SwapLetter(domainTmp, topLevelDomain))
+			}(&wg, &cs)
 		case STRATEGY_SWAP_VOWEL:
-			domains = append(domains, typogenerator.SwapVowel(domainTmp, topLevelDomain)...)
+			go func(wg *sync.WaitGroup, cs *ConcurrentSlice) {
+				defer wg.Done()
+				cs.Append(typogenerator.SwapVowel(domainTmp, topLevelDomain))
+			}(&wg, &cs)
 		case STRATEGY_DOT:
-			domains = append(domains, typogenerator.MissingDot(domainTmp, topLevelDomain)...)
+			go func(wg *sync.WaitGroup, cs *ConcurrentSlice) {
+				defer wg.Done()
+				cs.Append(typogenerator.MissingDot(domainTmp, topLevelDomain))
+			}(&wg, &cs)
 		case STRATEGY_HOMOGLYPHS:
-			domains = append(domains, typogenerator.ReplaceByHomoglyphs(domainTmp, topLevelDomain)...)
+			go func(wg *sync.WaitGroup, cs *ConcurrentSlice) {
+				defer wg.Done()
+				cs.Append(typogenerator.ReplaceByHomoglyphs(domainTmp, topLevelDomain))
+			}(&wg, &cs)
 		case STRATEGY_TOP_DOMAIN:
-			domains = append(domains, typogenerator.ChangeTopDomain(domainTmp)...)
+			go func(wg *sync.WaitGroup, cs *ConcurrentSlice) {
+				defer wg.Done()
+				cs.Append(typogenerator.ChangeTopDomain(domainTmp))
+			}(&wg, &cs)
 		default:
 		}
 	}
+	wg.Wait()
 
 	t.AppendHeader(table.Row{"#", "Domain name", "Available"})
-	for idx, domain := range domains {
+	for idx, domain := range cs.domains {
 		exists, err := domainExists(domain)
 		if err != nil && verbose {
 			log.Println(err.Error())
