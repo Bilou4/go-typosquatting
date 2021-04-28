@@ -6,6 +6,7 @@ import (
 	"log"
 	"net"
 	"os"
+	"runtime"
 	"strings"
 	"sync"
 
@@ -154,21 +155,38 @@ func main() {
 	wg.Wait()
 
 	t.AppendHeader(table.Row{"#", "Domain name", "Available"})
-	for idx, domain := range cs.domains {
-		exists, err := domainExists(domain)
+	var nbElem = len(cs.domains)
+	result := make([]table.Row, nbElem)
+
+	var numCPU = runtime.NumCPU()
+	c := make(chan int, numCPU) // Buffering optional but sensible.
+
+	for i := 0; i < numCPU; i++ {
+		go doSome(i*len(cs.domains)/numCPU, (i+1)*len(cs.domains)/numCPU, &result, c)
+	}
+	// Drain the channel.
+	for i := 0; i < numCPU; i++ {
+		<-c // wait for one task to complete
+	}
+	t.AppendRows(result)
+
+	t.Render()
+}
+
+// Apply the operation 'domainExists' to cs.domains[i], cs.domains[i+1] ... up to cs.domains[n-1].
+func doSome(i, n int, result *[]table.Row, c chan int) {
+	for ; i < n; i++ {
+		exists, err := domainExists(cs.domains[i])
 		if err != nil && verbose {
 			log.Println(err.Error())
 		}
 		if exists {
-			t.AppendRows([]table.Row{{text.FgHiBlue.Sprintf("%v", idx), text.FgHiBlue.Sprintf("%v", domain), text.FgHiBlue.Sprintf("%v", !exists)}})
+			(*result)[i] = table.Row{text.FgHiBlue.Sprintf("%v", i), text.FgHiBlue.Sprintf("%v", domain), text.FgHiBlue.Sprintf("%v", !exists)}
 		} else {
-			t.AppendRows([]table.Row{{text.FgHiGreen.Sprintf("%v", idx), text.FgHiGreen.Sprintf("%v", domain), text.FgHiGreen.Sprintf("%v", !exists)}})
+			(*result)[i] = table.Row{text.FgHiGreen.Sprintf("%v", i), text.FgHiGreen.Sprintf("%v", domain), text.FgHiGreen.Sprintf("%v", !exists)}
 		}
 	}
-
-	t.AppendSeparator()
-
-	t.Render()
+	c <- 1 // signal that this piece is done
 }
 
 func domainExists(domain string) (bool, error) {
