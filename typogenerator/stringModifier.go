@@ -132,12 +132,12 @@ func ReplaceByHomoglyphs(domain, tld string) []string {
 // For example, www.trademe.co.nz becomes www.trademe.co.nz and www.google.com becomes www.google.org
 func ChangeTopDomain(domain string) []string {
 	var res []string
-	for _, tdl := range topDomain {
-		res = append(res, domain+"."+tdl)
+	for _, tld := range topDomain {
+		res = append(res, concatDomainTopLevel(domain, tld))
 	}
 	return res
 }
 
-func concatDomainTopLevel(domain, tdl string) string {
-	return domain + "." + tdl
+func concatDomainTopLevel(domain, tld string) string {
+	return domain + "." + tld
 }
