@@ -11,8 +11,8 @@ import (
 
 	"github.com/asaskevich/govalidator"
 	"github.com/bilou4/go-typosquatting/typogenerator"
-	"github.com/jedib0t/go-pretty/table"
-	"github.com/jedib0t/go-pretty/text"
+	"github.com/jedib0t/go-pretty/v6/table"
+	"github.com/jedib0t/go-pretty/v6/text"
 	"github.com/pkg/errors"
 )
 
@@ -166,7 +166,7 @@ func main() {
 		}
 	}
 
-	// t.AppendSeparator()
+	t.AppendSeparator()
 
 	t.Render()
 }
