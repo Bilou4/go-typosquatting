@@ -27,6 +27,7 @@ Special thanks to the authors of these github repositories.
 * https://github.com/jedib0t/go-pretty
 * https://github.com/asaskevich/govalidator
 * https://github.com/codebox/homoglyph/
+* https://github.com/gosuri/uiprogress
 
 For the Top Level Domain list.
 * http://data.iana.org/TLD/tlds-alpha-by-domain.txt
