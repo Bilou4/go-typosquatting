@@ -12,12 +12,14 @@ import (
 
 	"github.com/asaskevich/govalidator"
 	"github.com/bilou4/go-typosquatting/typogenerator"
+	"github.com/gosuri/uiprogress"
 	"github.com/jedib0t/go-pretty/v6/table"
 	"github.com/jedib0t/go-pretty/v6/text"
 	"github.com/pkg/errors"
 )
 
 var (
+	bar            *uiprogress.Bar
 	cs             ConcurrentSlice
 	domain         string
 	verbose        bool
@@ -91,6 +93,7 @@ func main() {
 	t := table.NewWriter()
 	t.SetOutputMirror(os.Stdout)
 	domainTmp, topLevelDomain := typogenerator.SplitDomain(domain)
+	uiprogress.Start()
 
 	// we need to wait X goroutines (X is the number of strategies defined by the user)
 	wg.Add(len(strategiesList))
@@ -153,12 +156,18 @@ func main() {
 		}
 	}
 	wg.Wait()
-
 	t.AppendHeader(table.Row{"#", "Domain name", "Available"})
 	var nbElem = len(cs.domains)
 	result := make([]table.Row, nbElem)
 
 	var numCPU = runtime.NumCPU()
+	bar = uiprogress.AddBar(nbElem).AppendCompleted().PrependElapsed()
+
+	// prepend the current step to the bar
+	bar.PrependFunc(func(b *uiprogress.Bar) string {
+		return "LookupHost"
+	})
+
 	c := make(chan int, numCPU) // Buffering optional but sensible.
 
 	for i := 0; i < numCPU; i++ {
@@ -170,6 +179,7 @@ func main() {
 	}
 	t.AppendRows(result)
 
+	uiprogress.Stop()
 	t.Render()
 }
 
@@ -185,6 +195,7 @@ func doSome(i, n int, result *[]table.Row, c chan int) {
 		} else {
 			(*result)[i] = table.Row{text.FgHiGreen.Sprintf("%v", i), text.FgHiGreen.Sprintf("%v", domain), text.FgHiGreen.Sprintf("%v", !exists)}
 		}
+		bar.Incr()
 	}
 	c <- 1 // signal that this piece is done
 }
