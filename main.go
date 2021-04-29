@@ -191,9 +191,9 @@ func doSome(i, n int, result *[]table.Row, c chan int) {
 			log.Println(err.Error())
 		}
 		if exists {
-			(*result)[i] = table.Row{text.FgHiBlue.Sprintf("%v", i), text.FgHiBlue.Sprintf("%v", domain), text.FgHiBlue.Sprintf("%v", !exists)}
+			(*result)[i] = table.Row{text.FgHiBlue.Sprintf("%v", i), text.FgHiBlue.Sprintf("%v", cs.domains[i]), text.FgHiBlue.Sprintf("%v", !exists)}
 		} else {
-			(*result)[i] = table.Row{text.FgHiGreen.Sprintf("%v", i), text.FgHiGreen.Sprintf("%v", domain), text.FgHiGreen.Sprintf("%v", !exists)}
+			(*result)[i] = table.Row{text.FgHiGreen.Sprintf("%v", i), text.FgHiGreen.Sprintf("%v", cs.domains[i]), text.FgHiGreen.Sprintf("%v", !exists)}
 		}
 		bar.Incr()
 	}
