@@ -13,7 +13,7 @@ Example:
 
 ### Installing
 
-Make sure that Go is installed on your computer.
+Make sure that Go (tested on go1.16.3) is installed on your computer.
 ```sh
 git clone https://github.com/Bilou4/go-typosquatting.git
 go mod tidy
